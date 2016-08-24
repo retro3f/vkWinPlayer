@@ -88,7 +88,7 @@ namespace vkWinPlayer
                 textProfileName.Text = String.Format("Вы вошли как: {0} {1}", getFirstName, getLastName);
 
                 imgProfile.ImageLocation = getPhotoProfile; // подгружаем аватарку профиля.
-                pictureGetArtist.ImageLocation = getArtistPicture("placebo");
+                pictureGetArtist.ImageLocation = getArtistPicture("");
                 try
                 {
                     // Задаем стандартную громкость(10%)
