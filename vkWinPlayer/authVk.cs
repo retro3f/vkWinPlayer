@@ -158,6 +158,7 @@ namespace vkWinPlayer
                         ini.IniWrite("UserInfo", "access_token", AccessToken);
                         ini.IniWrite("UserInfo", "uid", UserUID);
                         ini.IniWrite("UserInfo", "auth", "ok");
+                        ini.IniWrite("UserInfo", "lastfm_access_token", "");
 
                         Form1 ifrm = new Form1();
                         ifrm.Left = this.Left; 

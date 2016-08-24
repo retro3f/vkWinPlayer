@@ -48,7 +48,8 @@ namespace vkWinPlayer
 		 string apiServerVK = "https://api.vk.com/method/";
 		 string apiVersion = "5.53";
          public string accessToken;
-         public string userUid = "34";
+         public string userUid;
+         public string lastFmAccessToken;
 
          // Глобальные переменные функции - (getUserInfo)
          string getUserUid; 
@@ -75,6 +76,10 @@ namespace vkWinPlayer
             }
             else
             {
+                if (lastFmAccessToken == "")
+                {
+                    MetroMessageBox.Show(this, "Ключ доступа LAST.FM(access_token) не найден!!!", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 string allAudioFiles = Convert.ToString(getAudioCount(userUid));
                 audioGet(userUid, allAudioFiles);
                 getUserInfo(userUid, "photo_50");
@@ -83,7 +88,7 @@ namespace vkWinPlayer
                 textProfileName.Text = String.Format("Вы вошли как: {0} {1}", getFirstName, getLastName);
 
                 imgProfile.ImageLocation = getPhotoProfile; // подгружаем аватарку профиля.
-
+                pictureGetArtist.ImageLocation = getArtistPicture("placebo");
                 try
                 {
                     // Задаем стандартную громкость(10%)
@@ -147,11 +152,11 @@ namespace vkWinPlayer
         {
             accessToken = ini.IniRead("UserInfo", "access_token");
             userUid = ini.IniRead("UserInfo", "uid");
+            lastFmAccessToken = ini.IniRead("UserInfo", "lastfm_access_token");
         }
 
 
         // Функция получает более детальные данные о пользователе 
-
         public void getUserInfo(string uid, string fields){
             
             string inq = apiServerVK + "users.get?user_ids=" + uid + "&access_token=" + accessToken + "&fields=" + fields +  "&v=" + apiVersion;
@@ -172,15 +177,61 @@ namespace vkWinPlayer
            }
 
 
-        // Функция получает количество аудизаписей у данного пользователя.
+        // Функция для получения картинки артиста с Last.Fm
+        public string getArtistPicture(string nameArtist)
+        {
+            string lastFmAccessToken = ini.IniRead("UserInfo", "lastfm_access_token");
+            string error_img_link_no_album = "https://pp.vk.me/c630827/v630827017/43eff/Af5KwCw1bP4.jpg";
+            
+            if (lastFmAccessToken == "")
+            {
+               return error_img_link_no_album;
+            }
+            else
+            {
+                try
+                {
+                    string lastFmGetLink = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=" + nameArtist + "&api_key=" + lastFmAccessToken + "&format=json";
+                    string lastFmResp = inetGet(lastFmGetLink);
 
+                    if (lastFmResp == "")
+                    {
+                        return error_img_link_no_album;
+                    }
+                    else
+                    {
+
+                        var json = JObject.Parse(lastFmResp);
+                        var reg_response = json["artist"]["image"] as JContainer;
+                        var valid_json = reg_response[1] as JObject;
+                        string reg_response2 = valid_json["#text"].ToString();
+
+                        if (reg_response2 == "")
+                        {
+                            return error_img_link_no_album;
+                        }
+                        else
+                        {
+                            return reg_response2;
+                        }
+                    }
+                }
+                catch (System.NullReferenceException)
+                {
+                    return error_img_link_no_album;
+                }
+            }
+        }
+
+
+        // Функция получает количество аудизаписей у данного пользователя.
         public int getAudioCount(string uid)
         {
             try
             {
                 if (uid == "")
                 {
-                    return 0; // в случаем если не был передан uid.
+                    return 0; // если не был передан uid.
                 }
                 else
                 {
@@ -239,17 +290,25 @@ namespace vkWinPlayer
 
         public string inetGet(string str)
         {
-            var webRequest = WebRequest.Create(str);
-            using (var response = webRequest.GetResponse())
-            using (var content = response.GetResponseStream())
-            using (var reader = new StreamReader(content))
+            try
             {
-                return reader.ReadToEnd();
+                var webRequest = WebRequest.Create(str);
+                using (var response = webRequest.GetResponse())
+                using (var content = response.GetResponseStream())
+                using (var reader = new StreamReader(content))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+            catch (System.Net.WebException)
+            {
+                return "";
             }
         }
-
-		private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+          
+		public void listBox1_SelectedIndexChanged(object sender, EventArgs e)
 		{
+
 			WMPs.URL = audioList[listBox1.SelectedIndex].url;
 			if (audioList[listBox1.SelectedIndex].url == "")
 			{
@@ -258,7 +317,11 @@ namespace vkWinPlayer
 			else
 			{
 				WMPs.controls.play();
-				Thread.Sleep(1000);
+                string sListBox = listBox1.SelectedItem.ToString();
+                string[] splitslistBox = sListBox.Split('-');
+                splitslistBox[0] = splitslistBox[0].Replace(@" ", @"");
+                pictureGetArtist.ImageLocation = getArtistPicture(splitslistBox[0]);
+                Thread.Sleep(1000);
 				timerOneUpdateTrackBarAndPosition.Enabled = true;
                 //timerTwoMusicSwitch.Enabled = true;
 			}

@@ -49,7 +49,9 @@ namespace vkWinPlayer
             this.autoPlayMusic = new MetroFramework.Controls.MetroCheckBox();
             this.metroLabel1 = new MetroFramework.Controls.MetroLabel();
             this.checkMute = new MetroFramework.Controls.MetroCheckBox();
+            this.pictureGetArtist = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.imgProfile)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureGetArtist)).BeginInit();
             this.SuspendLayout();
             // 
             // listBox1
@@ -58,7 +60,7 @@ namespace vkWinPlayer
             this.listBox1.FormattingEnabled = true;
             this.listBox1.Location = new System.Drawing.Point(21, 26);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(358, 225);
+            this.listBox1.Size = new System.Drawing.Size(358, 160);
             this.listBox1.TabIndex = 2;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
@@ -189,7 +191,7 @@ namespace vkWinPlayer
             // autoPlayMusic
             // 
             this.autoPlayMusic.AutoSize = true;
-            this.autoPlayMusic.Location = new System.Drawing.Point(391, 163);
+            this.autoPlayMusic.Location = new System.Drawing.Point(102, 218);
             this.autoPlayMusic.Name = "autoPlayMusic";
             this.autoPlayMusic.Size = new System.Drawing.Size(145, 15);
             this.autoPlayMusic.TabIndex = 31;
@@ -200,7 +202,7 @@ namespace vkWinPlayer
             // metroLabel1
             // 
             this.metroLabel1.AutoSize = true;
-            this.metroLabel1.Location = new System.Drawing.Point(385, 141);
+            this.metroLabel1.Location = new System.Drawing.Point(102, 196);
             this.metroLabel1.Name = "metroLabel1";
             this.metroLabel1.Size = new System.Drawing.Size(77, 19);
             this.metroLabel1.TabIndex = 32;
@@ -209,7 +211,7 @@ namespace vkWinPlayer
             // checkMute
             // 
             this.checkMute.AutoSize = true;
-            this.checkMute.Location = new System.Drawing.Point(391, 185);
+            this.checkMute.Location = new System.Drawing.Point(102, 239);
             this.checkMute.Name = "checkMute";
             this.checkMute.Size = new System.Drawing.Size(111, 15);
             this.checkMute.TabIndex = 33;
@@ -217,11 +219,21 @@ namespace vkWinPlayer
             this.checkMute.UseSelectable = true;
             this.checkMute.CheckedChanged += new System.EventHandler(this.checkMute_CheckedChanged);
             // 
+            // pictureGetArtist
+            // 
+            this.pictureGetArtist.ImageLocation = "";
+            this.pictureGetArtist.Location = new System.Drawing.Point(21, 196);
+            this.pictureGetArtist.Name = "pictureGetArtist";
+            this.pictureGetArtist.Size = new System.Drawing.Size(68, 67);
+            this.pictureGetArtist.TabIndex = 34;
+            this.pictureGetArtist.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(752, 398);
+            this.Controls.Add(this.pictureGetArtist);
             this.Controls.Add(this.checkMute);
             this.Controls.Add(this.metroLabel1);
             this.Controls.Add(this.autoPlayMusic);
@@ -250,6 +262,7 @@ namespace vkWinPlayer
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.imgProfile)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureGetArtist)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -275,6 +288,7 @@ namespace vkWinPlayer
         private MetroFramework.Controls.MetroCheckBox autoPlayMusic;
         private MetroFramework.Controls.MetroLabel metroLabel1;
         private MetroFramework.Controls.MetroCheckBox checkMute;
+        private System.Windows.Forms.PictureBox pictureGetArtist;
 
     }
 }
