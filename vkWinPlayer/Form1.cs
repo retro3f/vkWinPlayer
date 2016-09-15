@@ -262,31 +262,39 @@ namespace vkWinPlayer
 
         }
 
-		public void audioGet(string owner_id, string count)
-		{
-			string q = apiServerVK + "audio.get?owner_id=" + owner_id + "&count=" + count + "&access_token=" + accessToken;
-			
-			string res = inetGet(q);
-			if (res == "")
-			{
-                MetroMessageBox.Show(this, "Неудалось синхронизироватся с API.VK.COM", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				Environment.Exit(0);
-			}
-			else
-			{
-                JToken token = JToken.Parse(res);
-                audioList = Enumerable.Skip(token["response"].Children(), 1).Select(c => c.ToObject<Audio>()).ToList();
-                //string[] arr1 = new string[] { };
-           
-                this.Invoke((MethodInvoker)delegate
+        public void audioGet(string owner_id, string count)
+        {
+            try
+            {
+                string q = apiServerVK + "audio.get?owner_id=" + owner_id + "&count=" + count + "&access_token=" + accessToken;
+
+                string res = inetGet(q);
+                if (res == "")
                 {
-                    for (int i = 0; i < audioList.Count(); i++)
+                    MetroMessageBox.Show(this, "Неудалось синхронизироватся с API.VK.COM", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    JToken token = JToken.Parse(res);
+                    audioList = Enumerable.Skip(token["response"].Children(), 1).Select(c => c.ToObject<Audio>()).ToList();
+                    //string[] arr1 = new string[] { };
+
+                    this.Invoke((MethodInvoker)delegate
                     {
-                        listBox1.Items.Add(audioList[i].artist + " - " + audioList[i].title);
-                    }
-                });
-			}
-		}
+                        for (int i = 0; i < audioList.Count(); i++)
+                        {
+                            listBox1.Items.Add(audioList[i].artist + " - " + audioList[i].title);
+                        }
+                    });
+                }
+            }
+            catch (System.NullReferenceException)
+            {
+                MetroMessageBox.Show(this, "Исключение: System.NullReferenceException| Функции(audioGet) не удалось получить список аудифайлов с сервера. ", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
+        }
 
         public string inetGet(string str)
         {
