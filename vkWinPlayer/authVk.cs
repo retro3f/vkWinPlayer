@@ -45,11 +45,26 @@ namespace vkWinPlayer
 
         private void authVk_Load(object sender, EventArgs e)
         {
-            getIniOptions();
-            Process.Start("cmd.exe", "/C RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 255");
-            // загружаем главную страницу
-            webBrowser1.Refresh();
-            string htmlMainPage = @"
+            if (!System.IO.File.Exists(Application.StartupPath + "\\vkWinPlayerSettings.ini")) // првоеряем конфиг
+            {
+                MetroMessageBox.Show(this, "Конфиг файл(vkWinPlayerSettings.ini) не найден и будет создан.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.IO.StreamWriter wIniConfigFile = new System.IO.StreamWriter(Application.StartupPath + "\\vkWinPlayerSettings.ini");
+                wIniConfigFile.WriteLine("[Settings]");
+                wIniConfigFile.WriteLine("appId=");
+                wIniConfigFile.WriteLine("scope=offline,audio");
+                wIniConfigFile.WriteLine("appSecretKey=");
+                wIniConfigFile.WriteLine("[UserInfo]");
+                wIniConfigFile.WriteLine("access_token=");
+                wIniConfigFile.WriteLine("lastfm_access_token=");
+                wIniConfigFile.Close();
+            }
+            else
+            {
+                getIniOptions();
+                Process.Start("cmd.exe", "/C RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 255");
+                // загружаем главную страницу
+                webBrowser1.Refresh();
+                string htmlMainPage = @"
             <html>
 <head>
 <title>vkWinPlayer | Auth</title>
@@ -78,9 +93,9 @@ namespace vkWinPlayer
 </body>
 <html>
             ";
-            webBrowser1.DocumentText = htmlMainPage;
+                webBrowser1.DocumentText = htmlMainPage;
+            }
         }
-
 
         public void getIniOptions()
         {
