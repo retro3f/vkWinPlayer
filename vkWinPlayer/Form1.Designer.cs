@@ -50,6 +50,10 @@ namespace vkWinPlayer
             this.metroLabel1 = new MetroFramework.Controls.MetroLabel();
             this.checkMute = new MetroFramework.Controls.MetroCheckBox();
             this.pictureGetArtist = new System.Windows.Forms.PictureBox();
+            this.audioRepeat = new MetroFramework.Controls.MetroCheckBox();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.BtnDownloadAudioFile = new MetroFramework.Controls.MetroButton();
+            this.timerAudioRepeat = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.imgProfile)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureGetArtist)).BeginInit();
             this.SuspendLayout();
@@ -58,7 +62,7 @@ namespace vkWinPlayer
             // 
             this.listBox1.BackColor = System.Drawing.SystemColors.Window;
             this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(21, 26);
+            this.listBox1.Location = new System.Drawing.Point(21, 13);
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(358, 160);
             this.listBox1.TabIndex = 2;
@@ -161,9 +165,9 @@ namespace vkWinPlayer
             this.textCountAudio.AutoSize = true;
             this.textCountAudio.Location = new System.Drawing.Point(385, 108);
             this.textCountAudio.Name = "textCountAudio";
-            this.textCountAudio.Size = new System.Drawing.Size(49, 19);
+            this.textCountAudio.Size = new System.Drawing.Size(70, 19);
             this.textCountAudio.TabIndex = 28;
-            this.textCountAudio.Text = "qqqqq";
+            this.textCountAudio.Text = "user name";
             // 
             // timerTwoMusicSwitch
             // 
@@ -191,7 +195,7 @@ namespace vkWinPlayer
             // autoPlayMusic
             // 
             this.autoPlayMusic.AutoSize = true;
-            this.autoPlayMusic.Location = new System.Drawing.Point(102, 218);
+            this.autoPlayMusic.Location = new System.Drawing.Point(102, 198);
             this.autoPlayMusic.Name = "autoPlayMusic";
             this.autoPlayMusic.Size = new System.Drawing.Size(145, 15);
             this.autoPlayMusic.TabIndex = 31;
@@ -202,7 +206,7 @@ namespace vkWinPlayer
             // metroLabel1
             // 
             this.metroLabel1.AutoSize = true;
-            this.metroLabel1.Location = new System.Drawing.Point(102, 196);
+            this.metroLabel1.Location = new System.Drawing.Point(102, 176);
             this.metroLabel1.Name = "metroLabel1";
             this.metroLabel1.Size = new System.Drawing.Size(77, 19);
             this.metroLabel1.TabIndex = 32;
@@ -211,7 +215,7 @@ namespace vkWinPlayer
             // checkMute
             // 
             this.checkMute.AutoSize = true;
-            this.checkMute.Location = new System.Drawing.Point(102, 239);
+            this.checkMute.Location = new System.Drawing.Point(102, 240);
             this.checkMute.Name = "checkMute";
             this.checkMute.Size = new System.Drawing.Size(111, 15);
             this.checkMute.TabIndex = 33;
@@ -222,17 +226,44 @@ namespace vkWinPlayer
             // pictureGetArtist
             // 
             this.pictureGetArtist.ImageLocation = "";
-            this.pictureGetArtist.Location = new System.Drawing.Point(21, 196);
+            this.pictureGetArtist.Location = new System.Drawing.Point(23, 188);
             this.pictureGetArtist.Name = "pictureGetArtist";
             this.pictureGetArtist.Size = new System.Drawing.Size(68, 67);
             this.pictureGetArtist.TabIndex = 34;
             this.pictureGetArtist.TabStop = false;
+            // 
+            // audioRepeat
+            // 
+            this.audioRepeat.AutoSize = true;
+            this.audioRepeat.Location = new System.Drawing.Point(102, 219);
+            this.audioRepeat.Name = "audioRepeat";
+            this.audioRepeat.Size = new System.Drawing.Size(176, 15);
+            this.audioRepeat.TabIndex = 35;
+            this.audioRepeat.Text = "Повторять эту композицию";
+            this.audioRepeat.UseSelectable = true;
+            this.audioRepeat.CheckedChanged += new System.EventHandler(this.audioRepeat_CheckedChanged);
+            // 
+            // BtnDownloadAudioFile
+            // 
+            this.BtnDownloadAudioFile.Location = new System.Drawing.Point(312, 179);
+            this.BtnDownloadAudioFile.Name = "BtnDownloadAudioFile";
+            this.BtnDownloadAudioFile.Size = new System.Drawing.Size(67, 23);
+            this.BtnDownloadAudioFile.TabIndex = 36;
+            this.BtnDownloadAudioFile.Text = "скачать";
+            this.BtnDownloadAudioFile.UseSelectable = true;
+            this.BtnDownloadAudioFile.Click += new System.EventHandler(this.BtnDownloadAudioFile_Click);
+            // 
+            // timerAudioRepeat
+            // 
+            this.timerAudioRepeat.Tick += new System.EventHandler(this.timerAudioRepeat_Tick);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(752, 398);
+            this.Controls.Add(this.BtnDownloadAudioFile);
+            this.Controls.Add(this.audioRepeat);
             this.Controls.Add(this.pictureGetArtist);
             this.Controls.Add(this.checkMute);
             this.Controls.Add(this.metroLabel1);
@@ -289,6 +320,10 @@ namespace vkWinPlayer
         private MetroFramework.Controls.MetroLabel metroLabel1;
         private MetroFramework.Controls.MetroCheckBox checkMute;
         private System.Windows.Forms.PictureBox pictureGetArtist;
+        private MetroFramework.Controls.MetroCheckBox audioRepeat;
+        private System.Windows.Forms.Timer timer1;
+        private MetroFramework.Controls.MetroButton BtnDownloadAudioFile;
+        private System.Windows.Forms.Timer timerAudioRepeat;
 
     }
 }

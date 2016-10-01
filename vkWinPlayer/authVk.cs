@@ -154,7 +154,6 @@ namespace vkWinPlayer
                 else
                 {
                     {
-
                         ini.IniWrite("UserInfo", "access_token", AccessToken);
                         ini.IniWrite("UserInfo", "uid", UserUID);
                         ini.IniWrite("UserInfo", "auth", "ok");

@@ -44,18 +44,18 @@ namespace vkWinPlayer
             InitializeComponent();
             this.MouseWheel += new MouseEventHandler(changeInVolume_MouseWheel);
         }
-         
-		 string apiServerVK = "https://api.vk.com/method/";
-		 string apiVersion = "5.53";
-         public string accessToken;
-         public string userUid;
-         public string lastFmAccessToken;
 
-         // Глобальные переменные функции - (getUserInfo)
-         string getUserUid; 
-         string getFirstName;
-         string getLastName;
-         string getPhotoProfile;
+        string apiServerVK = "https://api.vk.com/method/";
+        string apiVersion = "5.56";
+        public string accessToken;
+        public string userUid;
+        public string lastFmAccessToken;
+
+        // Глобальные переменные функции - (getUserInfo)
+        string getUserUid;
+        string getFirstName;
+        string getLastName;
+        string getPhotoProfile;
 
         // Старт плеера.
         WindowsMediaPlayer WMPs = new WMPLib.WindowsMediaPlayer(); //создаётся плеер
@@ -84,7 +84,7 @@ namespace vkWinPlayer
                 audioGet(userUid, allAudioFiles);
                 getUserInfo(userUid, "photo_50");
 
-                textCountAudio.Text = String.Format("У вас {0} аудизаписей", allAudioFiles);
+                textCountAudio.Text = String.Format("У вас {0} аудиозаписей", allAudioFiles);
                 textProfileName.Text = String.Format("Вы вошли как: {0} {1}", getFirstName, getLastName);
 
                 imgProfile.ImageLocation = getPhotoProfile; // подгружаем аватарку профиля.
@@ -143,12 +143,22 @@ namespace vkWinPlayer
                 {
                     checkMute.Checked = false;
                 }
+
+                string getIniAudioRepeat = ini.IniRead("PlayerSettings", "AudioRepeat");
+
+                if (getIniAudioRepeat == "True")
+                {
+                    audioRepeat.Checked = true;
+                }
+                else
+                {
+                    audioRepeat.Checked = false;
+                }
+
             }
         }
-           
 
-       
-         public void getIniAccessTokenAndUid()
+        public void getIniAccessTokenAndUid()
         {
             accessToken = ini.IniRead("UserInfo", "access_token");
             userUid = ini.IniRead("UserInfo", "uid");
@@ -157,24 +167,25 @@ namespace vkWinPlayer
 
 
         // Функция получает более детальные данные о пользователе 
-        public void getUserInfo(string uid, string fields){
-            
-            string inq = apiServerVK + "users.get?user_ids=" + uid + "&access_token=" + accessToken + "&fields=" + fields +  "&v=" + apiVersion;
+        public void getUserInfo(string uid, string fields)
+        {
+
+            string inq = apiServerVK + "users.get?user_ids=" + uid + "&access_token=" + accessToken + "&fields=" + fields + "&v=" + apiVersion;
             string inetGetCall = inetGet(inq);
- 
+
 
             var json = JObject.Parse(inetGetCall);
             var reg_response = json["response"] as JContainer;
             var valid_json = reg_response[0] as JObject;
 
             dynamic GetUserInfo = JsonConvert.DeserializeObject<dynamic>(valid_json.ToString());
-           
-            
-              getUserUid      = GetUserInfo.id; // UID
-              getFirstName    = GetUserInfo.first_name; // first_name
-              getLastName     = GetUserInfo.last_name; // last_name
-              getPhotoProfile = GetUserInfo.photo_50; // photo_50
-           }
+
+
+            getUserUid = GetUserInfo.id; // UID
+            getFirstName = GetUserInfo.first_name; // first_name
+            getLastName = GetUserInfo.last_name; // last_name
+            getPhotoProfile = GetUserInfo.photo_50; // photo_50
+        }
 
 
         // Функция для получения картинки артиста с Last.Fm
@@ -182,10 +193,10 @@ namespace vkWinPlayer
         {
             string lastFmAccessToken = ini.IniRead("UserInfo", "lastfm_access_token");
             string error_img_link_no_album = "https://pp.vk.me/c630827/v630827017/43eff/Af5KwCw1bP4.jpg";
-            
+
             if (lastFmAccessToken == "")
             {
-               return error_img_link_no_album;
+                return error_img_link_no_album;
             }
             else
             {
@@ -235,7 +246,7 @@ namespace vkWinPlayer
                 }
                 else
                 {
-                    string getAudioCounts = apiServerVK + "audio.getCount?owner_id=" + uid + "&access_token=" + accessToken;
+                    string getAudioCounts = apiServerVK + "audio.getCount?owner_id=" + uid + "&access_token=" + accessToken + "&v=" + apiVersion;
                     string audioCountJson = inetGet(getAudioCounts);
                     dynamic ac = JsonConvert.DeserializeObject<dynamic>(audioCountJson);
                     return ac.response; // результат.
@@ -246,7 +257,7 @@ namespace vkWinPlayer
                 return 0;
             }
         }
-       
+
         public List<Audio> audioList = null;
 
         public class Audio
@@ -262,31 +273,42 @@ namespace vkWinPlayer
 
         }
 
-		public void audioGet(string owner_id, string count)
-		{
-			string q = apiServerVK + "audio.get?owner_id=" + owner_id + "&count=" + count + "&access_token=" + accessToken;
-			
-			string res = inetGet(q);
-			if (res == "")
-			{
-                MetroMessageBox.Show(this, "Неудалось синхронизироватся с API.VK.COM", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				Environment.Exit(0);
-			}
-			else
-			{
-                JToken token = JToken.Parse(res);
-                audioList = Enumerable.Skip(token["response"].Children(), 1).Select(c => c.ToObject<Audio>()).ToList();
-                //string[] arr1 = new string[] { };
-           
-                this.Invoke((MethodInvoker)delegate
+        public void audioGet(string owner_id, string count)
+        {
+            try
+            {
+
+
+                string q = apiServerVK + "audio.get?owner_id=" + owner_id + "&count=" + count + "&access_token=" + accessToken + "&v=" + apiVersion;
+ 
+                string res = inetGet(q);
+
+                if (res == "")
                 {
-                    for (int i = 0; i < audioList.Count(); i++)
+                    MetroMessageBox.Show(this, "Неудалось синхронизироватся с API.VK.COM", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    JToken token = JToken.Parse(res);
+                    audioList = Enumerable.Skip(token["response"]["items"].Children(), 1).Select(c => c.ToObject<Audio>()).ToList();
+                    //string[] arr1 = new string[] { };
+
+                    this.Invoke((MethodInvoker)delegate
                     {
-                        listBox1.Items.Add(audioList[i].artist + " - " + audioList[i].title);
-                    }
-                });
-			}
-		}
+                        for (int i = 0; i < audioList.Count(); i++)
+                        {
+                            listBox1.Items.Add(audioList[i].artist + " - " + audioList[i].title);
+                        }
+                    });
+                }
+            }
+            catch (System.NullReferenceException)
+            {
+                MetroMessageBox.Show(this, "Исключение: System.NullReferenceException| Функции(audioGet) не удалось получить список аудифайлов с сервера. ", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
+        }
 
         public string inetGet(string str)
         {
@@ -305,74 +327,77 @@ namespace vkWinPlayer
                 return "";
             }
         }
-          
-		public void listBox1_SelectedIndexChanged(object sender, EventArgs e)
-		{
 
-			WMPs.URL = audioList[listBox1.SelectedIndex].url;
-			if (audioList[listBox1.SelectedIndex].url == "")
-			{
-				timerOneUpdateTrackBarAndPosition.Enabled = false;
-			}
-			else
-			{
-				WMPs.controls.play();
+        public void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            WMPs.URL = audioList[listBox1.SelectedIndex].url;
+
+            if (audioList[listBox1.SelectedIndex].url == "")
+            {
+                timerOneUpdateTrackBarAndPosition.Enabled = false;
+            }
+            else
+            {
+                WMPs.controls.play();
+                ini.IniWrite("PlayerSettings", "AudioRepeatPos", Convert.ToString(listBox1.SelectedIndex));
+
                 string sListBox = listBox1.SelectedItem.ToString();
                 string[] splitslistBox = sListBox.Split('-');
                 splitslistBox[0] = splitslistBox[0].Replace(@" ", @"");
                 pictureGetArtist.ImageLocation = getArtistPicture(splitslistBox[0]);
                 Thread.Sleep(1000);
-				timerOneUpdateTrackBarAndPosition.Enabled = true;
+                timerOneUpdateTrackBarAndPosition.Enabled = true;
                 //timerTwoMusicSwitch.Enabled = true;
-			}
-		}
+            }
+        }
 
         public void timerOneUpdateTrackBarAndPosition_Tick(object sender, EventArgs e)
-		{
-			try
-			{
-				audioTrackBar.Maximum = Convert.ToInt32(WMPs.currentMedia.duration);
-				audioTrackBar.Value = Convert.ToInt32(WMPs.controls.currentPosition);
-				
+        {
+            try
+            {
+                audioTrackBar.Maximum = Convert.ToInt32(WMPs.currentMedia.duration);
+                audioTrackBar.Value = Convert.ToInt32(WMPs.controls.currentPosition);
+
                 currentPositionAudio.Text = WMPs.controls.currentPositionString; // начало трека
-				durationAudio.Text = WMPs.currentMedia.durationString; // Конец трека
-                
+                durationAudio.Text = WMPs.currentMedia.durationString; // Конец трека
+
                 audioNameRealTimes.Text = WMPs.status.ToString();
-			}
+            }
             catch (System.ArgumentOutOfRangeException)
-			{
-                
-			}
-		}
+            {
 
-		private void audioTrackBar_Scroll(object sender, ScrollEventArgs e)
-		{
-			double time = WMPs.controls.currentPosition = audioTrackBar.Value;
-		}
+            }
+        }
 
-		public void changeInVolume_Scroll(object sender, ScrollEventArgs e)
-		{
+        private void audioTrackBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            double time = WMPs.controls.currentPosition = audioTrackBar.Value;
+        }
+
+        public void changeInVolume_Scroll(object sender, ScrollEventArgs e)
+        {
             ini.IniWrite("PlayerSettings", "Volume", Convert.ToString(changeInVolume.Value));
-			VolumeText.Text = string.Format("Громкость: {0}", changeInVolume.Value);
-			WMPs.settings.volume = changeInVolume.Value;
-		}
+            VolumeText.Text = string.Format("Громкость: {0}", changeInVolume.Value);
+            WMPs.settings.volume = changeInVolume.Value;
+        }
 
-		private void ButtonPlayAudio_Click(object sender, EventArgs e)
-		{
-			WMPs.controls.play();
+        private void ButtonPlayAudio_Click(object sender, EventArgs e)
+        {
+            WMPs.controls.play();
             //timerTwoMusicSwitch.Enabled = true;
-		}
+        }
 
-		private void ButtonPauseAudio_Click(object sender, EventArgs e)
-		{
-		     WMPs.controls.pause();
-		}
+        private void ButtonPauseAudio_Click(object sender, EventArgs e)
+        {
+            WMPs.controls.pause();
+        }
 
-		private void ButtonStopAudio_Click(object sender, EventArgs e)
-		{
-		      WMPs.controls.stop();
-              timerTwoMusicSwitch.Enabled = false;
-		}
+        private void ButtonStopAudio_Click(object sender, EventArgs e)
+        {
+            WMPs.controls.stop();
+            timerTwoMusicSwitch.Enabled = false;
+        }
 
         public void timerTwoMusicSwitch_Tick(object sender, EventArgs e)
         {
@@ -408,52 +433,54 @@ namespace vkWinPlayer
 
         private void autoPlayMusic_CheckedChanged(object sender, EventArgs e)
         {
-             string checkAutoPlayStatus = ini.IniRead("PlayerSettings", "AutoPlayStatus");
-             
+            string checkAutoPlayStatus = ini.IniRead("PlayerSettings", "AutoPlayStatus");
+
             if (autoPlayMusic.Checked == true)
-             {
-                 if (checkAutoPlayStatus == "True")
-                 {
-                     timerTwoMusicSwitch.Enabled = true;
-                 }
-                 else
-                 {
-                     ini.IniWrite("PlayerSettings", "AutoPlayStatus", Convert.ToString(timerTwoMusicSwitch.Enabled = true));
-                 }
-             }
-             else
-             {
-                 timerTwoMusicSwitch.Enabled = false;
-                 ini.IniWrite("PlayerSettings", "AutoPlayStatus", Convert.ToString(timerTwoMusicSwitch.Enabled = false));
-             }
+            {
+                if (autoPlayMusic.Checked) audioRepeat.Checked = false;
+                if (checkAutoPlayStatus == "True")
+                {
+                    timerTwoMusicSwitch.Enabled = true;
+                    
+                }
+                else
+                {
+                    ini.IniWrite("PlayerSettings", "AutoPlayStatus", Convert.ToString(timerTwoMusicSwitch.Enabled = true));
+                }
+            }
+            else
+            {
+                timerTwoMusicSwitch.Enabled = false;
+                ini.IniWrite("PlayerSettings", "AutoPlayStatus", Convert.ToString(timerTwoMusicSwitch.Enabled = false));
+            }
         }
 
         private void checkMute_CheckedChanged(object sender, EventArgs e)
         {
-                string getIniVolumes = ini.IniRead("PlayerSettings", "Volume");
-                string checkMuteStatus = ini.IniRead("PlayerSettings", "MuteStatus");
+            string getIniVolumes = ini.IniRead("PlayerSettings", "Volume");
+            string checkMuteStatus = ini.IniRead("PlayerSettings", "MuteStatus");
 
-                if (checkMute.Checked == true)
+            if (checkMute.Checked == true)
+            {
+                if (checkMuteStatus == "True")
                 {
-                    if (checkMuteStatus == "True")
-                    {
-                        VolumeText.Text = string.Format("Громкость: {0}", changeInVolume.Value = 0);
-                        WMPs.settings.volume = changeInVolume.Value = 0;
-                    }
-                    else
-                    {
-                        VolumeText.Text = string.Format("Громкость: {0}", changeInVolume.Value = 0);
-                        WMPs.settings.volume = changeInVolume.Value = 0;
-                        ini.IniWrite("PlayerSettings", "MuteStatus", Convert.ToString(checkMute.Checked));
-                    }
+                    VolumeText.Text = string.Format("Громкость: {0}", changeInVolume.Value = 0);
+                    WMPs.settings.volume = changeInVolume.Value = 0;
                 }
                 else
                 {
+                    VolumeText.Text = string.Format("Громкость: {0}", changeInVolume.Value = 0);
+                    WMPs.settings.volume = changeInVolume.Value = 0;
                     ini.IniWrite("PlayerSettings", "MuteStatus", Convert.ToString(checkMute.Checked));
-                    VolumeText.Text = string.Format("Громкость: {0}", changeInVolume.Value = Convert.ToInt32(getIniVolumes));
-                    WMPs.settings.volume = changeInVolume.Value = Convert.ToInt32(getIniVolumes);
                 }
             }
+            else
+            {
+                ini.IniWrite("PlayerSettings", "MuteStatus", Convert.ToString(checkMute.Checked));
+                VolumeText.Text = string.Format("Громкость: {0}", changeInVolume.Value = Convert.ToInt32(getIniVolumes));
+                WMPs.settings.volume = changeInVolume.Value = Convert.ToInt32(getIniVolumes);
+            }
+        }
         public void changeInVolume_MouseWheel(object sender, MouseEventArgs e)
         {
             ((HandledMouseEventArgs)e).Handled = true;//disable default mouse wheel
@@ -480,5 +507,98 @@ namespace vkWinPlayer
         {
             Environment.Exit(0);
         }
-	}
-}
+
+        private void audioRepeat_CheckedChanged(object sender, EventArgs e)
+        {
+            string checkAudioRepeatStatus = ini.IniRead("PlayerSettings", "AudioRepeat");
+
+            if (audioRepeat.Checked == true)
+            {
+                if (audioRepeat.Checked) autoPlayMusic.Checked = false;
+
+                if (checkAudioRepeatStatus == "True")
+                {
+                    timerAudioRepeat.Enabled = true;
+
+                }
+                else
+                {
+                    ini.IniWrite("PlayerSettings", "AudioRepeat", Convert.ToString(timerAudioRepeat.Enabled = true));
+                }
+            }
+            else
+            {
+                timerAudioRepeat.Enabled = false;
+                ini.IniWrite("PlayerSettings", "AudioRepeat", Convert.ToString(timerAudioRepeat.Enabled = false));
+            }
+        }
+
+        public void BtnDownloadAudioFile_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string getPathAudioFile = ini.IniRead("PlayerSettings", "AudioDownloadPath");
+
+                if (getPathAudioFile == "")
+                {
+                    MetroMessageBox.Show(this, "В открывшемся окне выберите папку куда сохранить ваши аудиофайлы и нажмите кнопку: 'ок'.", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    FolderBrowserDialog fbdPath = new FolderBrowserDialog();
+                    if (fbdPath.ShowDialog() == DialogResult.OK)
+                    {
+                        ini.IniWrite("PlayerSettings", "AudioDownloadPath", fbdPath.SelectedPath);
+                    }
+                }
+                else
+                {
+                    WebClient webClient = new WebClient();
+                    string LinkAudioFile = audioList[listBox1.SelectedIndex].url;
+                    string nameArtistOrTitle = audioList[listBox1.SelectedIndex].artist + " - " + audioList[listBox1.SelectedIndex].title;
+                    LinkAudioFile = LinkAudioFile.Substring(0, LinkAudioFile.LastIndexOf('?'));
+
+                    if (LinkAudioFile == "" && nameArtistOrTitle == "")
+                    {
+                        MetroMessageBox.Show(this, "Неудалось получить имя аудиофайла или ссылку с сервера...", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        webClient.DownloadFileAsync(new Uri(LinkAudioFile), getPathAudioFile + "/" + nameArtistOrTitle + ".mp3");
+
+                        MetroMessageBox.Show(this, "Вы успешно скачали: " + nameArtistOrTitle, "", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                    }
+                }
+            }
+            catch (System.ArgumentOutOfRangeException)
+            {
+                // если item не выбран, а кнопка скачать была нажата.
+                MetroMessageBox.Show(this, "Пожалуйста выберите аудиофайл для скачивания.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void timerAudioRepeat_Tick(object sender, EventArgs e)
+        {
+            //MessageBox.Show();
+            if (currentPositionAudio.Text == "00:00" && durationAudio.Text == "00:00")
+            {
+            }
+            else
+            {
+                if (audioRepeat.Checked == true) // Если чекбокс активный, то делаем автовоспроизведение.
+                {
+                    if (audioNameRealTimes.Text == "Остановлено")
+                    {
+                        try
+                        {
+                            string getIniPosAudioRepeat = ini.IniRead("PlayerSettings", "AudioRepeatPos");
+                            listBox1.SelectedIndex = Convert.ToInt32(getIniPosAudioRepeat); // Если трек завершился мы воспроизводим его заново.
+                            WMPs.controls.play();
+                        }
+                        catch
+                        {
+                            //!
+                        }
+                    }
+                }
+            }
+        }
+    }
+}    

@@ -11,6 +11,7 @@
  *----------------------------------------------------------
  */
 
+using MetroFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,8 @@ namespace vkWinPlayer
 {
     static class Program
     {
-    
+
+
         public static bool CheckForInternetConnection()
         {
             IPStatus status = IPStatus.TimedOut;
@@ -50,28 +52,44 @@ namespace vkWinPlayer
         [STAThread]
         static void Main()
         {
-            if (CheckForInternetConnection() == true)
+            try
             {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                IniLib ini = new IniLib(Application.StartupPath + "\\vkWinPlayerSettings.ini");
-                string statusAuth = ini.IniRead("UserInfo", "auth");
-                
-               // Если ююзер авторизован. А что то лучше я не придумал...:)
-                if (statusAuth == "ok")
+                try
                 {
-                    Application.Run(new Form1());
+                    if (CheckForInternetConnection() == true)
+                    {
+
+                        Application.EnableVisualStyles();
+                        Application.SetCompatibleTextRenderingDefault(false);
+                        IniLib ini = new IniLib(Application.StartupPath + "\\vkWinPlayerSettings.ini");
+                        string statusAuth = ini.IniRead("UserInfo", "auth");
+
+                        // Если ююзер авторизован. А что то лучше я не придумал...:)
+                        if (statusAuth == "ok")
+                        {
+                            Application.Run(new Form1());
+                        }
+                        else
+                        {
+                            Application.Run(new authVk());
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Пожалуйста проверьте подключение к интернету!", "vkWinPlayer::ERROR_CONNECTION", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Environment.Exit(0);
+                    }
                 }
-                else
+                catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
                 {
-                    Application.Run(new authVk());
+                    //System.NullReferenceException
                 }
             }
-            else
+            catch (System.NullReferenceException)
             {
-                MessageBox.Show("Пожалуйста проверьте подключение к интернету!", "vkWinPlayer::ERROR_CONNECTION", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+
+                //MetroMessageBox.Show("System.NullReferenceException", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
-}
+} 
